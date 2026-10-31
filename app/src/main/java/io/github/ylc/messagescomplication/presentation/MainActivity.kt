@@ -57,6 +57,7 @@ fun WearApp() {
     val lifecycleOwner = LocalLifecycleOwner.current
 
     var hasPermission by remember { mutableStateOf(isNotificationListenerEnabled(context)) }
+    var hasDumpPermission by remember { mutableStateOf(isDumpPermissionGranted(context)) }
     var unreadCount by remember { mutableIntStateOf(MessagesNotificationListener.getStoredCount(context)) }
     var countIndividual by remember {
         mutableStateOf(MessagesNotificationListener.isCountingIndividualMessages(context))
@@ -76,6 +77,7 @@ fun WearApp() {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 hasPermission = isNotificationListenerEnabled(context)
+                hasDumpPermission = isDumpPermissionGranted(context)
                 unreadCount = MessagesNotificationListener.getStoredCount(context)
                 countIndividual = MessagesNotificationListener.isCountingIndividualMessages(context)
             }
@@ -136,6 +138,34 @@ fun WearApp() {
                                     "Listener: Active ($unreadCount unread)"
                                 } else {
                                     "Grant Notification Access"
+                                }
+                            )
+                        }
+                    }
+
+                    item {
+                        Button(
+                            onClick = {
+                                context.startActivity(Intent(context, AdbSetupActivity::class.java))
+                            },
+                            colors = if (hasDumpPermission) {
+                                ButtonDefaults.filledTonalButtonColors()
+                            } else {
+                                ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                                    contentColor = MaterialTheme.colorScheme.onErrorContainer
+                                )
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .transformedHeight(this, transformationSpec),
+                            transformation = SurfaceTransformation(transformationSpec),
+                        ) {
+                            Text(
+                                text = if (hasDumpPermission) {
+                                    "Phone sync: Enabled"
+                                } else {
+                                    "Phone sync: Setup needed"
                                 }
                             )
                         }
