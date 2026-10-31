@@ -1,4 +1,4 @@
-package com.example.messagescomplication.presentation
+package io.github.ylc.messagescomplication.presentation
 
 import android.content.Context
 import android.content.Intent
@@ -34,8 +34,8 @@ import androidx.wear.compose.material3.SurfaceTransformation
 import androidx.wear.compose.material3.Text
 import androidx.wear.compose.material3.lazy.rememberTransformationSpec
 import androidx.wear.compose.material3.lazy.transformedHeight
-import com.example.messagescomplication.MessagesNotificationListener
-import com.example.messagescomplication.presentation.theme.MessagesComplicationTheme
+import io.github.ylc.messagescomplication.MessagesNotificationListener
+import io.github.ylc.messagescomplication.presentation.theme.MessagesComplicationTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

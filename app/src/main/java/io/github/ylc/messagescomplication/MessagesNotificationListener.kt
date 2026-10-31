@@ -1,4 +1,4 @@
-package com.example.messagescomplication
+package io.github.ylc.messagescomplication
 
 import android.app.Notification
 import android.content.BroadcastReceiver

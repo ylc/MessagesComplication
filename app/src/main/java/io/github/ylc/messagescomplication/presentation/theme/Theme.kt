@@ -1,4 +1,4 @@
-package com.example.messagescomplication.presentation.theme
+package io.github.ylc.messagescomplication.presentation.theme
 
 import androidx.compose.runtime.Composable
 import androidx.wear.compose.material3.MaterialTheme

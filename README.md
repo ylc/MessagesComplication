@@ -27,13 +27,35 @@ Requirements: Android Studio, and a watch with developer options and ADB debuggi
 2. Grant the DUMP permission, which is needed to count notifications bridged from your phone:
 
    ```sh
-   adb shell pm grant com.example.messagescomplication android.permission.DUMP
+   adb shell pm grant io.github.ylc.messagescomplication android.permission.DUMP
    ```
 
 3. Open the app on the watch and tap **Grant Notification Access**.
 4. Long-press your watch face, then add the **Unread Messages** complication to a slot.
 
 Without step 2, the complication only counts notifications that the watch posts itself.
+
+## Building a signed release
+
+1. Create an upload key. Keep this file and its passwords safe, and never commit them:
+
+   ```sh
+   keytool -genkeypair -v -keystore upload-keystore.jks -alias upload \
+     -keyalg RSA -keysize 2048 -validity 10000
+   ```
+
+2. Copy `keystore.properties.example` to `keystore.properties` and fill in your values. This file is gitignored.
+3. Build the app bundle to upload to Google Play:
+
+   ```sh
+   ./gradlew bundleRelease
+   ```
+
+   The output is written to `app/build/outputs/bundle/release/app-release.aab`.
+
+## Privacy
+
+The app has no internet permission and no data leaves the watch. See the [privacy policy](docs/privacy-policy.md).
 
 ## License
 

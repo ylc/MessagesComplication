@@ -6,16 +6,6 @@
         android:name="android.permission.DUMP"
         xmlns:tools="http://schemas.android.com/tools"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission
-        android:name="android.permission.READ_LOGS"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:ignore="ProtectedPermissions" />
-    <uses-permission
-        android:name="android.permission.PACKAGE_USAGE_STATS"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:ignore="ProtectedPermissions" />
-
-    <!-- Periodic update fallback (every 60s) + instant push updates -->
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -70,7 +60,7 @@
             <meta-data
                 android:name="android.support.wearable.complications.SUPPORTED_TYPES"
                 android:value="SHORT_TEXT,LONG_TEXT" />
-            <!-- 0 = Push-only updates triggered by our NotificationListenerService -->
+            <!-- Periodic fallback; the NotificationListenerService also pushes updates instantly -->
             <meta-data
                 android:name="android.support.wearable.complications.UPDATE_PERIOD_SECONDS"
                 android:value="60" />

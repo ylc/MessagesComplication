@@ -1,4 +1,4 @@
-package com.example.messagescomplication
+package io.github.ylc.messagescomplication
 
 import android.app.PendingIntent
 import android.graphics.drawable.Icon
