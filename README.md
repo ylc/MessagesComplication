@@ -1,0 +1,40 @@
+# Messages Complication
+
+A Wear OS complication that shows how many unread Google Messages notifications are on your watch. It was built for and tested on the Pixel Watch.
+
+## Features
+
+- Supports the `SHORT_TEXT` and `LONG_TEXT` complication types and shows a chat icon.
+- Tapping the complication opens Google Messages.
+- Two counting modes, switchable in the app:
+  - **Total Messages**: every unread message across all threads.
+  - **Conversations**: unread conversations only.
+- Counts both kinds of notifications:
+  - Ones the watch posts itself (standalone on LTE or Wi-Fi).
+  - Ones bridged from your phone.
+
+## How it works
+
+- `MessagesNotificationListener` is a `NotificationListenerService`. It counts the local Google Messages notifications.
+- Notifications bridged from the phone don't appear in the local `NotificationManager`. To count those, the listener reads the Wear OS SysUI `NotificationTrayDataStore` through a dumpsys call, which needs the `DUMP` permission.
+- `UnreadMessagesComplicationService` provides the stored count to the watch face.
+
+## Install (sideload)
+
+Requirements: Android Studio, and a watch with developer options and ADB debugging enabled.
+
+1. Build and install the app on your watch from Android Studio.
+2. Grant the DUMP permission, which is needed to count notifications bridged from your phone:
+
+   ```sh
+   adb shell pm grant com.example.messagescomplication android.permission.DUMP
+   ```
+
+3. Open the app on the watch and tap **Grant Notification Access**.
+4. Long-press your watch face, then add the **Unread Messages** complication to a slot.
+
+Without step 2, the complication only counts notifications that the watch posts itself.
+
+## License
+
+[Apache 2.0](LICENSE)
