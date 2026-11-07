@@ -48,7 +48,8 @@ class AdbSetupActivity : ComponentActivity() {
 }
 
 fun isDumpPermissionGranted(context: Context): Boolean {
-    return context.checkSelfPermission(Manifest.permission.DUMP) == PackageManager.PERMISSION_GRANTED
+    return context.checkSelfPermission(Manifest.permission.DUMP) == PackageManager.PERMISSION_GRANTED &&
+        context.checkSelfPermission(Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED
 }
 
 @Composable
@@ -67,7 +68,8 @@ fun AdbSetupScreen() {
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    val command = "adb shell pm grant ${context.packageName} android.permission.DUMP"
+    val command = "adb shell pm grant ${context.packageName} android.permission.DUMP && " +
+        "adb shell pm grant ${context.packageName} android.permission.PACKAGE_USAGE_STATS"
 
     MessagesComplicationTheme {
         AppScaffold {

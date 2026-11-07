@@ -24,10 +24,11 @@ A Wear OS complication that shows how many unread Google Messages notifications 
 Requirements: Android Studio, and a watch with developer options and ADB debugging enabled.
 
 1. Build and install the app on your watch from Android Studio.
-2. Grant the DUMP permission, which is needed to count notifications bridged from your phone:
+2. Grant the DUMP and PACKAGE_USAGE_STATS permissions, which are needed to count notifications bridged from your phone:
 
    ```sh
    adb shell pm grant io.github.ylc.messagescomplication android.permission.DUMP
+   adb shell pm grant io.github.ylc.messagescomplication android.permission.PACKAGE_USAGE_STATS
    ```
 
 3. Open the app on the watch and tap **Grant Notification Access**.

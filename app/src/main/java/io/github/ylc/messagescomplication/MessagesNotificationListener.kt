@@ -68,6 +68,14 @@ class MessagesNotificationListener : NotificationListenerService() {
             ).requestUpdateAll()
         }
 
+        private val SYSUI_DUMP_TARGETS = listOf(
+            arrayOf("com.google.android.wearable.sysui/.mainui.activity.SysUiActivity"),
+            arrayOf(
+                "service",
+                "com.google.android.wearable.sysui/com.google.android.clockwork.sysui.mainui.module.dumpsys.DumpsysService"
+            )
+        )
+
         /**
          * Reads Wear OS SysUI NotificationTrayDataStore via IBinder.dump on the "activity" service
          * to count bridged Google Messages notifications that live in the Wear OS notification
@@ -85,61 +93,61 @@ class MessagesNotificationListener : NotificationListenerService() {
                     return null
                 }
 
-                val pipe = ParcelFileDescriptor.createPipe()
-                val readSide = pipe[0]
-                val writeSide = pipe[1]
+                var lastFirstLine: String? = null
+                for (dumpArgs in SYSUI_DUMP_TARGETS) {
+                    val pipe = ParcelFileDescriptor.createPipe()
+                    val readSide = pipe[0]
+                    val writeSide = pipe[1]
 
-                val dumpThread = Thread {
-                    try {
-                        activityBinder.dump(
-                            writeSide.fileDescriptor,
-                            arrayOf(
-                                "service",
-                                "com.google.android.wearable.sysui/com.google.android.clockwork.sysui.mainui.module.dumpsys.DumpsysService"
-                            )
-                        )
-                    } catch (e: Throwable) {
-                        Log.e(TAG, "Error in activityBinder.dump", e)
-                    } finally {
-                        runCatching { writeSide.close() }
+                    val dumpThread = Thread {
+                        try {
+                            activityBinder.dump(writeSide.fileDescriptor, dumpArgs)
+                        } catch (e: Throwable) {
+                            Log.e(TAG, "Error in activityBinder.dump", e)
+                        } finally {
+                            runCatching { writeSide.close() }
+                        }
                     }
-                }
-                dumpThread.start()
+                    dumpThread.start()
 
-                val updateCounts = mutableListOf<Int>()
-                var inTraySection = false
-                var firstLine: String? = null
+                    val updateCounts = mutableListOf<Int>()
+                    var inTraySection = false
+                    var firstLine: String? = null
 
-                ParcelFileDescriptor.AutoCloseInputStream(readSide).use { input ->
-                    BufferedReader(InputStreamReader(input)).use { reader ->
-                        var line: String?
-                        while (reader.readLine().also { line = it } != null) {
-                            val l = line ?: continue
-                            if (firstLine == null && l.isNotBlank()) {
-                                firstLine = l
-                            }
-                            if (l.contains("NotificationTrayDataStore")) {
-                                inTraySection = true
-                            } else if (inTraySection && l.contains("#####")) {
-                                break
-                            } else if (inTraySection && l.contains(MESSAGES_PKG)) {
-                                val match = STREAM_ITEM_REGEX.find(l)
-                                if (match != null) {
-                                    val updateCount = match.groupValues[3].toIntOrNull() ?: 0
-                                    updateCounts.add(updateCount)
+                    ParcelFileDescriptor.AutoCloseInputStream(readSide).use { input ->
+                        BufferedReader(InputStreamReader(input)).use { reader ->
+                            var line: String?
+                            while (reader.readLine().also { line = it } != null) {
+                                val l = line ?: continue
+                                if (firstLine == null && l.isNotBlank()) {
+                                    firstLine = l
+                                }
+                                if (l.contains("NotificationTrayDataStore")) {
+                                    inTraySection = true
+                                } else if (inTraySection && l.contains("#####")) {
+                                    break
+                                } else if (inTraySection && l.contains(MESSAGES_PKG)) {
+                                    val match = STREAM_ITEM_REGEX.find(l)
+                                    if (match != null) {
+                                        val updateCount = match.groupValues[3].toIntOrNull() ?: 0
+                                        updateCounts.add(updateCount)
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                dumpThread.join(3000L)
+                    dumpThread.join(3000L)
 
-                if (!inTraySection) {
-                    Log.w(TAG, "SysUI NotificationTrayDataStore section not found (firstLine=$firstLine)")
-                    return null
+                    if (inTraySection) {
+                        return calculateCountFromStreamItems(updateCounts, countIndividual)
+                    }
+                    if (firstLine != null) {
+                        lastFirstLine = firstLine
+                    }
                 }
 
-                calculateCountFromStreamItems(updateCounts, countIndividual)
+                Log.w(TAG, "SysUI NotificationTrayDataStore section not found (firstLine=$lastFirstLine)")
+                null
             } catch (e: Throwable) {
                 Log.e(TAG, "Failed to query SysUI tray via IBinder.dump", e)
                 null
